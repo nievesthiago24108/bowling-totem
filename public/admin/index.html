@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0b1e">
+  <meta name="robots" content="noindex">
+  <title>Bowling · Admin</title>
+  <link rel="stylesheet" href="/shared/tema.css">
+  <style>
+    * { box-sizing: border-box; }
+    html { background: var(--noche); }
+    body { margin: 0; min-height: 100vh; color: var(--blanco); font-family: var(--texto); background: var(--noche); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 40px; }
+    h1 { margin: 0; font-family: var(--titulo); font-size: 36px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; }
+    .sub { color: var(--gris); font-weight: 600; font-size: 15px; margin-top: 4px; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand img { width: 56px; height: 56px; flex: none; }
+    button, input { font: inherit; }
+    button { border: 0; border-radius: 4px; padding: 12px 18px; font-family: var(--titulo); font-weight: 700; font-size: 17px; letter-spacing: 2px;
+             text-transform: uppercase; cursor: pointer; background: var(--azul-boton); color: var(--blanco); }
+    button.sec { background: transparent; color: var(--celeste); border: 1px solid var(--panel-2); }
+    button.danger { background: var(--rojo-fondo); color: var(--blanco); }
+    button.small { padding: 7px 12px; font-size: 14px; }
+    button:disabled { opacity: 0.4; cursor: default; }
+    button:focus-visible, input:focus-visible { outline: 3px solid var(--celeste); outline-offset: 2px; }
+    input[type=password], input[type=search], input[type=text] {
+      width: 100%; font-size: 18px; font-weight: 600; padding: 12px 14px; border-radius: 4px;
+      border: 2px solid var(--panel-2); background: var(--panel); color: var(--blanco); outline: none;
+    }
+    input::placeholder { color: var(--gris); }
+    input:focus { border-color: var(--celeste); }
+    .card { background: var(--panel); border-top: 4px solid var(--azul); border-radius: 4px; padding: 22px; }
+    .msg { min-height: 22px; font-weight: 600; margin-top: 10px; }
+    .msg.err { color: var(--rojo); } .msg.ok { color: #6FCF8E; }
+    code { font-size: 0.92em; color: var(--celeste); }
+    #login { max-width: 400px; margin: 12vh auto 0; display: flex; flex-direction: column; gap: 12px; }
+    #panel { display: none; }
+    header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 4px solid var(--azul); }
+    .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 18px 0 12px; }
+    .bar .search { flex: 1 1 240px; }
+    .count { font-family: var(--titulo); color: var(--gris); font-weight: 700; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .table-wrap { overflow-x: auto; border-top: 1px solid var(--linea); }
+    table { width: 100%; border-collapse: collapse; min-width: 640px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--linea); font-size: 15px; }
+    th { font-family: var(--titulo); color: var(--gris); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+    th.n, td.n { text-align: right; font-variant-numeric: tabular-nums; }
+    td.pts { font-family: var(--titulo); font-weight: 800; font-size: 20px; }
+    td.name { font-weight: 700; }
+    .empty { text-align: center; color: var(--gris); padding: 30px; }
+    .zone { margin-top: 28px; border-top-color: var(--rojo-fondo); }
+    .zone h2 { margin: 0 0 6px; font-family: var(--titulo); font-size: 20px; letter-spacing: 2px; text-transform: uppercase; color: var(--rojo); }
+    dialog { width: min(460px, calc(100vw - 24px)); border: 0; border-top: 4px solid var(--azul); border-radius: 4px; background: var(--panel); color: var(--blanco); padding: 22px; }
+    dialog::backdrop { background: rgba(6, 17, 29, 0.8); }
+    dialog h3 { margin: 0 0 8px; font-family: var(--titulo); font-size: 24px; letter-spacing: 1px; }
+    dialog p { color: var(--gris); font-weight: 600; margin: 0 0 14px; line-height: 1.4; }
+    .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .credits { text-align: center; margin-top: 30px; font-family: var(--titulo); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; color: var(--gris); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <form id="login" class="card" autocomplete="off">
+      <div class="brand"><img src="/shared/emblema.svg" alt=""><h1>Admin</h1></div>
+      <div class="sub">Bowling Tótem · Ingresá el PIN de <code>config.json</code></div>
+      <input id="pin" type="password" inputmode="numeric" placeholder="PIN" aria-label="PIN" autofocus>
+      <button type="submit">Entrar</button>
+      <div class="msg err" id="login-msg" role="alert"></div>
+    </form>
+
+    <main id="panel">
+      <header>
+        <img src="/shared/emblema.svg" alt="" width="56" height="56">
+        <div>
+          <h1>Admin</h1>
+          <div class="sub" id="school"></div>
+        </div>
+        <button class="sec small" id="salir" style="margin-left:auto">Salir</button>
+      </header>
+
+      <div class="bar">
+        <div class="search"><input id="buscar" type="search" placeholder="Buscar por nombre" aria-label="Buscar por nombre"></div>
+        <button class="sec" id="recargar">Actualizar</button>
+        <button id="exportar">Exportar CSV</button>
+      </div>
+      <div class="msg" id="msg" role="status"></div>
+      <div class="count" id="count"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Nombre</th><th class="n">Puntaje</th><th class="n">Frames</th><th class="n">Plenos</th><th class="n">Semi</th><th class="n">Jug.</th><th></th></tr></thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+
+      <section class="card zone">
+        <h2>Reiniciar el leaderboard</h2>
+        <div class="sub">Archiva todos los puntajes en <code>data/archivo/</code> y empieza de cero (por ejemplo, para un torneo). No se borra nada del disco.</div>
+        <div style="margin-top:14px"><button class="danger" id="reiniciar">Reiniciar…</button></div>
+      </section>
+      <div class="credits" id="creditos"></div>
+    </main>
+  </div>
+
+  <dialog id="dlg-borrar">
+    <h3>¿Borrar este puntaje?</h3>
+    <p id="borrar-texto"></p>
+    <div class="actions">
+      <button class="sec" value="no" id="borrar-no">Cancelar</button>
+      <button class="danger" id="borrar-si">Borrar</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlg-reiniciar">
+    <h3>Reiniciar el leaderboard</h3>
+    <p>Se van a archivar <b id="reiniciar-n">0</b> puntajes y el ranking queda vacío. Para confirmar, escribí <b>REINICIAR</b>.</p>
+    <input id="reiniciar-txt" type="text" autocomplete="off" aria-label="Escribí REINICIAR">
+    <div class="actions">
+      <button class="sec" id="reiniciar-no">Cancelar</button>
+      <button class="danger" id="reiniciar-si" disabled>Reiniciar</button>
+    </div>
+  </dialog>
+
+  <script>
+  (function () {
+    'use strict';
+    const $ = (id) => document.getElementById(id);
+    const KEY = 'bowling.adminPin';
+    const ZONA = 'America/Argentina/Buenos_Aires';
+    const fmt = new Intl.DateTimeFormat('es-AR', { timeZone: ZONA, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    const clave = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+    let pin = null;
+    let lista = [];
+    let aBorrar = null;
+
+    const store = {
+      get() { try { return sessionStorage.getItem(KEY); } catch (e) { return null; } },
+      set(v) { try { if (v == null) sessionStorage.removeItem(KEY); else sessionStorage.setItem(KEY, v); } catch (e) { /* sin storage */ } },
+    };
+    function el(tag, cls, text) {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    function aviso(text, ok) {
+      $('msg').textContent = text || '';
+      $('msg').className = 'msg ' + (ok ? 'ok' : 'err');
+    }
+
+    /** fetch al admin con el PIN; si el PIN dejó de valer vuelve al login */
+    async function api(ruta, init) {
+      init = init || {};
+      init.headers = Object.assign({ 'x-pin': pin }, init.headers);
+      const res = await fetch('/api/admin' + ruta, init);
+      if (res.status === 401 || res.status === 429) {
+        const d = await res.json().catch(() => ({}));
+        salir(d.error || 'PIN incorrecto.');
+        throw new Error('sin permiso');
+      }
+      return res;
+    }
+
+    async function entrar(p) {
+      pin = p;
+      const boton = $('login').querySelector('button');
+      boton.disabled = true; // un doble toque no cuenta dos intentos de PIN
+      try {
+        await cargar();
+        store.set(p);
+        $('login').style.display = 'none';
+        $('panel').style.display = 'block';
+        $('buscar').focus();
+      } catch (e) {
+        // PIN incorrecto o bloqueo: api() ya volvió al login con el mensaje; si no, es la red
+        if (pin) {
+          pin = null;
+          $('login-msg').textContent = 'No se pudo conectar con el servidor. Probá de nuevo.';
+        }
+      } finally {
+        boton.disabled = false;
+      }
+    }
+    function salir(msg) {
+      pin = null;
+      store.set(null);
+      $('panel').style.display = 'none';
+      $('login').style.display = 'flex';
+      $('login-msg').textContent = msg || '';
+      $('pin').value = '';
+      $('pin').focus();
+    }
+
+    async function cargar() {
+      const res = await api('/puntajes', { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      lista = (await res.json()).lista || [];
+      pintar();
+    }
+
+    function pintar() {
+      const q = clave($('buscar').value);
+      const vista = q ? lista.filter((r) => clave(r.nombre).includes(q)) : lista;
+      $('count').textContent = vista.length + ' de ' + lista.length + ' puntajes';
+      const tb = $('filas');
+      tb.textContent = '';
+      if (!vista.length) {
+        const tr = el('tr');
+        const td = el('td', 'empty', q ? 'No hay puntajes con ese nombre.' : 'Todavía no hay puntajes.');
+        td.colSpan = 8;
+        tr.append(td);
+        tb.append(tr);
+        return;
+      }
+      vista.forEach((r) => {
+        const tr = el('tr');
+        tr.append(
+          el('td', null, fmt.format(new Date(r.fecha))),
+          el('td', 'name', r.nombre),
+          el('td', 'n pts', String(r.puntaje)),
+          el('td', 'n', String(r.frames)),
+          el('td', 'n', String(r.plenos)),
+          el('td', 'n', String(r.semiplenos)),
+          el('td', 'n', String(r.jugadores)),
+        );
+        const td = el('td', 'n');
+        const b = el('button', 'sec small', 'Borrar');
+        b.type = 'button';
+        b.setAttribute('aria-label', 'Borrar el puntaje de ' + r.nombre);
+        b.addEventListener('click', () => pedirBorrar(r));
+        td.append(b);
+        tr.append(td);
+        tb.append(tr);
+      });
+    }
+
+    function pedirBorrar(r) {
+      aBorrar = r;
+      $('borrar-texto').textContent = r.nombre + ' · ' + r.puntaje + ' puntos · ' + fmt.format(new Date(r.fecha)) +
+        '. Deja de aparecer en el ranking (queda marcado como borrado en el archivo).';
+      $('dlg-borrar').showModal();
+    }
+    $('borrar-no').addEventListener('click', () => $('dlg-borrar').close());
+    $('borrar-si').addEventListener('click', async () => {
+      $('dlg-borrar').close();
+      if (!aBorrar) return;
+      const r = aBorrar;
+      aBorrar = null;
+      try {
+        const res = await api('/puntajes/' + encodeURIComponent(r.id), { method: 'DELETE' });
+        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'No se pudo borrar.');
+        aviso('Se borró el puntaje de ' + r.nombre + '.', true);
+        await cargar();
+      } catch (e) { if (pin) aviso(e.message); }
+    });
+
+    $('exportar').addEventListener('click', async () => {
+      try {
+        const res = await api('/export.csv');
+        if (!res.ok) throw new Error('No se pudo exportar.');
+        const nombre = (/filename="?([^";]+)"?/.exec(res.headers.get('content-disposition') || '') || [])[1] || 'puntajes.csv';
+        const url = URL.createObjectURL(await res.blob());
+        const a = el('a');
+        a.href = url;
+        a.download = nombre;
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        aviso('Se descargó ' + nombre + '.', true);
+      } catch (e) { if (pin) aviso(e.message); }
+    });
+
+    $('reiniciar').addEventListener('click', () => {
+      $('reiniciar-n').textContent = String(lista.length);
+      $('reiniciar-txt').value = '';
+      $('reiniciar-si').disabled = true;
+      $('dlg-reiniciar').showModal();
+      $('reiniciar-txt').focus();
+    });
+    $('reiniciar-txt').addEventListener('input', (e) => { $('reiniciar-si').disabled = e.target.value.trim() !== 'REINICIAR'; });
+    $('reiniciar-no').addEventListener('click', () => $('dlg-reiniciar').close());
+    $('reiniciar-si').addEventListener('click', async () => {
+      $('dlg-reiniciar').close();
+      try {
+        const res = await api('/reiniciar', {
+          method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ confirmar: 'REINICIAR' }),
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || 'No se pudo reiniciar.');
+        aviso(d.archivado ? 'Leaderboard reiniciado. El anterior quedó en data/' + d.archivado + '.' : 'Leaderboard reiniciado.', true);
+        await cargar();
+      } catch (e) { if (pin) aviso(e.message); }
+    });
+
+    $('login').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const p = $('pin').value.trim();
+      if (!p) return;
+      $('login-msg').textContent = '';
+      entrar(p);
+    });
+    $('salir').addEventListener('click', () => salir());
+    $('recargar').addEventListener('click', () => { aviso(''); cargar().catch(() => {}); });
+    $('buscar').addEventListener('input', pintar);
+
+    fetch('/api/config').then((r) => r.json()).then((c) => {
+      $('school').textContent = c.nombreEscuela || '';
+      $('creditos').textContent = c.creditos || '';
+    }).catch(() => {});
+    const guardado = store.get();
+    if (guardado) entrar(guardado);
+  })();
+  </script>
+</body>
+</html>

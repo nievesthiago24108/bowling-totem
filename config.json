@@ -1,0 +1,10 @@
+{
+  "nombreEscuela": "Escuela Industrial Nº4 “José Menéndez”",
+  "frames": 3,
+  "maxJugadores": 6,
+  "puerto": 3000,
+  "segundosPorTurno": 25,
+  "pinAdmin": "1234",
+  "segundosRotacionRanking": 8,
+  "creditos": "Hecho por 5ºI Informática"
+}

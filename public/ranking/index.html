@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0b1e">
+  <title>Bowling · Ranking</title>
+  <link rel="stylesheet" href="/shared/tema.css">
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--noche); }
+    body { margin: 0; min-height: 100vh; color: var(--blanco); font-family: var(--texto); background: var(--noche); }
+    .wrap { max-width: 760px; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px 40px; }
+    header { display: flex; align-items: center; gap: 16px; padding-bottom: 14px; border-bottom: 4px solid var(--azul); margin-bottom: 4px; }
+    header img { width: 72px; height: 72px; flex: none; }
+    .school { font-family: var(--titulo); color: var(--celeste); font-weight: 600; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; }
+    h1 { margin: 2px 0 0; font-family: var(--titulo); font-size: clamp(38px, 10vw, 56px); font-weight: 800; letter-spacing: 6px; line-height: 1; }
+    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); position: sticky; top: 0; z-index: 2; background: var(--noche);
+            border-bottom: 1px solid var(--linea); }
+    .tabs button {
+      font-family: var(--titulo); font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; line-height: 1.15;
+      border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--gris); padding: 16px 4px 13px; cursor: pointer;
+    }
+    .tabs button[aria-selected="true"] { color: var(--blanco); border-bottom-color: var(--azul); }
+    .tabs button:focus-visible, .row button:focus-visible, input:focus-visible, .close:focus-visible, a:focus-visible { outline: 3px solid var(--celeste); outline-offset: 2px; }
+    .search { margin: 16px 0 6px; }
+    .search input {
+      width: 100%; font: inherit; font-size: 18px; font-weight: 600; padding: 13px 14px; border-radius: 4px;
+      border: 2px solid var(--panel-2); background: var(--panel); color: var(--blanco); outline: none;
+    }
+    .search input::placeholder { color: var(--gris); }
+    .search input:focus { border-color: var(--celeste); }
+    .head, .row { display: grid; grid-template-columns: 44px 1fr auto auto; align-items: center; gap: 12px; padding: 0 8px; }
+    .head { font-family: var(--titulo); color: var(--gris); font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 14px 0 6px; }
+    .head .r, .row .r { text-align: right; }
+    ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linea); }
+    .row { min-height: 60px; border-bottom: 1px solid var(--linea); }
+    .row.top1 { background: var(--panel); box-shadow: inset 4px 0 0 var(--naranja); }
+    .pos { width: 32px; height: 32px; display: grid; place-items: center; font-family: var(--titulo); font-weight: 800; font-size: 18px; color: var(--gris); }
+    .pos.m1 { background: var(--naranja); color: var(--noche); }
+    .pos.m2 { background: #C9D3DD; color: var(--noche); }
+    .pos.m3 { background: #C98A5A; color: var(--noche); }
+    .row button.name {
+      font: inherit; font-size: 18px; font-weight: 700; color: var(--blanco); background: none; border: 0; padding: 8px 0;
+      text-align: left; cursor: pointer; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .row button.name small { display: block; font-size: 13px; color: var(--gris); font-weight: 600; margin-top: 2px; white-space: normal; }
+    .meta { font-size: 13px; color: var(--gris); font-weight: 600; text-align: right; white-space: nowrap; }
+    .pts { font-family: var(--titulo); font-size: 28px; font-weight: 800; text-align: right; min-width: 52px; }
+    .row.top1 .pts { color: var(--naranja); }
+    .empty { text-align: center; color: var(--gris); font-weight: 600; padding: 36px 12px; }
+    footer { text-align: center; color: var(--gris); font-size: 13px; font-weight: 600; margin-top: 22px; line-height: 1.7; }
+    footer a { color: var(--celeste); text-decoration: none; font-weight: 700; }
+    .credits { font-family: var(--titulo); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; margin-top: 8px; }
+    .error { color: var(--rojo); }
+    /* historial */
+    dialog {
+      width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 40px); border: 0; border-top: 4px solid var(--azul); border-radius: 4px;
+      background: var(--panel); color: var(--blanco); padding: 0;
+    }
+    dialog::backdrop { background: rgba(6, 17, 29, 0.8); }
+    .dlg { display: flex; flex-direction: column; max-height: calc(100vh - 44px); }
+    .dlg-top { display: flex; align-items: flex-start; gap: 10px; padding: 18px 18px 8px; }
+    .dlg-top h2 { margin: 0; font-family: var(--titulo); font-size: 32px; font-weight: 800; letter-spacing: 1px; overflow-wrap: anywhere; }
+    .close { margin-left: auto; font: inherit; font-size: 15px; font-weight: 700; border: 1px solid var(--panel-2); background: transparent; color: var(--celeste);
+             padding: 8px 12px; border-radius: 4px; cursor: pointer; flex: none; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 6px 18px 14px; }
+    .stats div { text-align: center; padding: 8px; }
+    .stats div + div { border-left: 1px solid var(--linea); }
+    .stats b { display: block; font-family: var(--titulo); font-size: 30px; font-weight: 800; }
+    .stats span { font-family: var(--titulo); font-size: 13px; color: var(--gris); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+    .games { overflow: auto; padding: 0 18px 18px; }
+    .game { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 4px; border-top: 1px solid var(--linea); }
+    .game .d { font-weight: 700; font-size: 15px; }
+    .game .x { grid-column: 1; font-size: 13px; color: var(--gris); font-weight: 600; }
+    .game .p { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-family: var(--titulo); font-size: 30px; font-weight: 800; }
+    .game.best .p { color: var(--naranja); }
+    @media (min-width: 640px) {
+      .tabs button { font-size: 18px; }
+      .row button.name { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="/shared/emblema.svg" alt="">
+      <div>
+        <div class="school" id="school"></div>
+        <h1>RANKING</h1>
+      </div>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Tablas del ranking">
+      <button role="tab" data-tabla="hoy" aria-selected="true">Hoy</button>
+      <button role="tab" data-tabla="semana" aria-selected="false">Semana</button>
+      <button role="tab" data-tabla="siempre" aria-selected="false">Siempre</button>
+      <button role="tab" data-tabla="jugadores" aria-selected="false">Mejores<br>jugadores</button>
+    </div>
+
+    <div class="search">
+      <input id="buscar" type="search" placeholder="Buscar por nombre" autocomplete="off" spellcheck="false" aria-label="Buscar por nombre">
+    </div>
+
+    <div class="head" id="head"></div>
+    <ol id="lista" role="tabpanel"></ol>
+
+    <footer>
+      <div id="estado" aria-live="polite">Cargando…</div>
+      <div>Tocá un nombre para ver sus partidas · <a href="/j/">Jugar</a></div>
+      <div class="credits" id="creditos"></div>
+    </footer>
+  </div>
+
+  <dialog id="historial" aria-labelledby="h-nombre">
+    <div class="dlg">
+      <div class="dlg-top">
+        <h2 id="h-nombre"></h2>
+        <button class="close" id="cerrar">Cerrar</button>
+      </div>
+      <div class="stats" id="h-stats"></div>
+      <div class="games" id="h-lista"></div>
+    </div>
+  </dialog>
+
+  <script>
+  (function () {
+    'use strict';
+    const $ = (id) => document.getElementById(id);
+    const REFRESCO_MS = 15000;
+    const ZONA = 'America/Argentina/Buenos_Aires';
+    let tabla = 'hoy';
+    let datos = [];
+    let frames = 3;
+    let cargando = true;
+    let pedidoHistorial = 0;
+
+    try { const t = sessionStorage.getItem('ranking.tabla'); if (t) tabla = t; } catch (e) { /* sin storage */ }
+
+    const clave = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+    function el(tag, cls, text) {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    const fmtHora = new Intl.DateTimeFormat('es-AR', { timeZone: ZONA, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    const fmtFecha = new Intl.DateTimeFormat('es-AR', { timeZone: ZONA, day: 'numeric', month: 'short' });
+    const fmtCompleta = new Intl.DateTimeFormat('es-AR', { timeZone: ZONA, weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    const cuando = (iso) => (tabla === 'hoy' ? fmtHora.format(new Date(iso)) + ' h' : fmtFecha.format(new Date(iso)));
+    const plural = (n, uno, varios) => n + ' ' + (n === 1 ? uno : varios);
+
+    fetch('/api/config').then((r) => r.json()).then((c) => {
+      $('school').textContent = c.nombreEscuela || '';
+      $('creditos').textContent = c.creditos || '';
+    }).catch(() => {});
+
+    document.querySelectorAll('.tabs button').forEach((b) => {
+      b.addEventListener('click', () => {
+        tabla = b.dataset.tabla;
+        try { sessionStorage.setItem('ranking.tabla', tabla); } catch (e) { /* sin storage */ }
+        datos = [];
+        cargando = true; // hasta que llegue la tabla se muestra "Cargando…", no "no hay puntajes"
+        pintar();
+        cargar();
+      });
+    });
+    $('buscar').addEventListener('input', pintar);
+
+    async function cargar() {
+      const pedida = tabla;
+      try {
+        const res = await fetch('/api/leaderboard?tabla=' + pedida + '&n=100', { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+        if (pedida !== tabla) return; // el usuario cambió de pestaña mientras tanto
+        cargando = false;
+        datos = d.lista || [];
+        frames = d.frames || frames;
+        $('estado').textContent = 'Partidas de ' + frames + ' frames · Se actualiza solo · ' + fmtHora.format(new Date()) + ' h';
+        $('estado').classList.remove('error');
+      } catch (e) {
+        if (pedida !== tabla) return; // el error es de una pestaña vieja
+        $('estado').textContent = 'No se pudo actualizar. ¿Seguís en la wifi del tótem?';
+        $('estado').classList.add('error');
+      }
+      pintar();
+    }
+
+    function pintar() {
+      document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tabla === tabla)));
+      const head = $('head');
+      head.textContent = '';
+      const jug = tabla === 'jugadores';
+      head.append(el('span', null, '#'), el('span', null, 'Nombre'), el('span', 'r', jug ? 'Prom.' : ''), el('span', 'r', jug ? 'Mejor' : 'Puntos'));
+
+      const q = clave($('buscar').value);
+      const lista = q ? datos.filter((r) => clave(r.nombre).includes(q)) : datos;
+      const ol = $('lista');
+      ol.textContent = '';
+      if (!lista.length) {
+        let msg = 'Todavía no hay puntajes.';
+        if (cargando && !q) msg = 'Cargando…';
+        if (q) msg = 'No hay nadie con ese nombre en esta tabla.';
+        else if (tabla === 'hoy') msg = 'Todavía no hay puntajes hoy.';
+        else if (tabla === 'semana') msg = 'No hay puntajes en los últimos 7 días.';
+        ol.append(el('li', 'empty', msg));
+        return;
+      }
+      lista.forEach((r) => {
+        const li = el('li', 'row' + (r.puesto === 1 ? ' top1' : ''));
+        li.append(el('span', 'pos' + (r.puesto <= 3 ? ' m' + r.puesto : ''), String(r.puesto)));
+        const b = el('button', 'name', r.nombre);
+        b.type = 'button';
+        const detalle = [];
+        if (jug) detalle.push(plural(r.partidas, 'partida', 'partidas'));
+        else {
+          if (r.plenos) detalle.push(plural(r.plenos, 'pleno', 'plenos'));
+          if (r.semiplenos) detalle.push(plural(r.semiplenos, 'semipleno', 'semiplenos'));
+        }
+        if (detalle.length) b.append(el('small', null, detalle.join(' · ')));
+        b.addEventListener('click', () => abrirHistorial(r.nombre));
+        li.append(b);
+        li.append(el('span', 'meta', jug ? String(r.promedio).replace('.', ',') : cuando(r.fecha)));
+        li.append(el('span', 'pts', String(r.puntaje)));
+        ol.append(li);
+      });
+    }
+
+    async function abrirHistorial(nombre) {
+      const dlg = $('historial');
+      $('h-nombre').textContent = nombre;
+      $('h-stats').textContent = '';
+      $('h-lista').textContent = '';
+      $('h-lista').append(el('div', 'empty', 'Cargando…'));
+      if (!dlg.open) dlg.showModal();
+      const pedido = ++pedidoHistorial; // si abren otro nombre antes de que llegue, se ignora esta respuesta
+      try {
+        const res = await fetch('/api/jugador/' + encodeURIComponent(nombre), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const h = await res.json();
+        if (pedido !== pedidoHistorial) return;
+        $('h-nombre').textContent = h.nombre;
+        [['Partidas', h.partidas], ['Mejor', h.mejor], ['Promedio', String(h.promedio).replace('.', ',')]].forEach(([t, v]) => {
+          const d = el('div');
+          d.append(el('b', null, String(v)), el('span', null, t));
+          $('h-stats').append(d);
+        });
+        $('h-lista').textContent = '';
+        let marcado = false;
+        h.lista.forEach((g) => {
+          const best = !marcado && g.puntaje === h.mejor;
+          if (best) marcado = true;
+          const box = el('div', 'game' + (best ? ' best' : ''));
+          box.append(el('div', 'd', fmtCompleta.format(new Date(g.fecha))));
+          const x = [g.jugadores > 1 ? 'con ' + plural(g.jugadores - 1, 'jugador más', 'jugadores más') : 'partida individual'];
+          if (g.plenos) x.push(plural(g.plenos, 'pleno', 'plenos'));
+          if (g.semiplenos) x.push(plural(g.semiplenos, 'semipleno', 'semiplenos'));
+          box.append(el('div', 'x', x.join(' · ')), el('div', 'p', String(g.puntaje)));
+          $('h-lista').append(box);
+        });
+      } catch (e) {
+        if (pedido !== pedidoHistorial) return;
+        $('h-lista').textContent = '';
+        $('h-lista').append(el('div', 'empty', 'No se pudo cargar el historial.'));
+      }
+    }
+    $('cerrar').addEventListener('click', () => $('historial').close());
+    $('historial').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+
+    pintar();
+    cargar();
+    setInterval(() => { if (!document.hidden) cargar(); }, REFRESCO_MS);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) cargar(); });
+  })();
+  </script>
+</body>
+</html>

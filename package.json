@@ -1,0 +1,32 @@
+{
+  "name": "bowling-totem",
+  "version": "1.0.0",
+  "description": "Bowling 2D para totem vertical, con celulares como control",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "sim": "node test/sim.js",
+    "start": "node server.js",
+    "capturas": "node test/capturas.js",
+    "capturas:celu": "node test/celular.js",
+    "capturas:ranking": "node test/ranking.js",
+    "capturas:presentacion": "node test/presentacion.js",
+    "prueba:final": "node test/final.js",
+    "prueba:rendimiento": "node test/rendimiento.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "express": "^5.3.0",
+    "matter-js": "^0.20.0",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.1",
+    "socket.io-client": "^4.8.4"
+  }
+}

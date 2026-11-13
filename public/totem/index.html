@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bowling Tótem</title>
+  <link rel="stylesheet" href="/shared/tema.css">
+  <style>
+    html, body { margin: 0; height: 100%; background: #06111D; overflow: hidden; }
+    body { display: flex; align-items: center; justify-content: center; cursor: none; }
+    body.debug { cursor: default; }
+    #escena { position: relative; flex: none; }
+    #escena canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <!-- Lienzos lógicos de 1080 x 1920 apilados (totem.js los escala para entrar en la ventana):
+       #fondo = lo que casi no cambia, #pantalla = lo que se mueve en cada cuadro -->
+  <div id="escena">
+    <canvas id="fondo" width="1080" height="1920"></canvas>
+    <canvas id="pantalla" width="1080" height="1920"></canvas>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/vendor/matter.min.js"></script>
+  <script src="/shared/physics.js"></script>
+  <script src="/shared/scoring.js"></script>
+  <script src="game.js"></script>
+  <script src="sound.js"></script>
+  <script src="totem.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+BOWLING TÓTEM - COMANDOS PARA ACTIVARLO
+=======================================
+
+Carpeta del juego:  ~/Documentos/totem/bowling-totem
+
+
+1) FORMA RÁPIDA (recomendada para el tótem)
+-------------------------------------------
+Arranca el servidor y abre el tótem en pantalla completa (modo kiosco).
+Si el servidor se cae, se vuelve a levantar solo.
+
+    cd ~/Documentos/totem/bowling-totem
+    ./iniciar.sh
+
+Para salir del kiosco: Alt+F4 (al cerrar el navegador también se apaga el servidor).
+En Windows: doble clic en iniciar.bat
+
+
+2) FORMA MANUAL (para probar desde la compu)
+--------------------------------------------
+    cd ~/Documentos/totem/bowling-totem
+    npm start
+
+Después abrir en el navegador:
+    Tótem .............. http://localhost:3000        (tecla F = pantalla completa, M = silencio)
+    Ranking ............ http://localhost:3000/ranking
+    Admin .............. http://localhost:3000/admin  (PIN en config.json, "pinAdmin")
+
+Los celulares entran escaneando el QR que aparece en el tótem.
+(Tienen que estar en la misma red Wi-Fi que la compu.)
+
+Para apagarlo: Ctrl+C en la terminal donde corre.
+
+
+3) SI EL CELULAR NO CARGA ("tardó demasiado en responder")
+----------------------------------------------------------
+Es el firewall (ufw) de la compu. Hay que permitir el puerto 3000 en la red local:
+
+    sudo ufw allow from 10.0.0.0/24 to any port 3000 proto tcp comment 'Bowling Totem'
+
+(10.0.0.0/24 es la red de casa; en el colegio puede ser otra. Para ver la red:
+ ip -4 addr   y fijarse el número de la placa Wi-Fi, ej. 192.168.1.x -> 192.168.1.0/24)
+
+
+4) PRIMERA VEZ EN OTRA COMPU (desde GitHub)
+-------------------------------------------
+Necesita Node.js 20 o superior (https://nodejs.org) y git (https://git-scm.com).
+El código está en: https://github.com/nievesthiago24108/bowling-totem
+
+    git clone https://github.com/nievesthiago24108/bowling-totem.git
+    cd bowling-totem
+    ./iniciar.sh                  (en Windows: doble clic en iniciar.bat)
+
+  o a mano:
+    npm install --omit=dev
+    npm start
+
+Sin git: en la página del repo, botón verde "Code" -> "Download ZIP", descomprimir
+y hacer lo mismo desde esa carpeta.
+
+IMPORTANTE: el repo es público, así que cambiá "pinAdmin" en config.json
+(viene en 1234) en la compu donde lo uses.
+
+Para traer cambios nuevos más adelante:   git pull
+
+(iniciar.sh / iniciar.bat ya hacen el npm install solos si falta.)
+
+
+5) VER SI ALGO QUEDÓ PRENDIDO / APAGARLO A LA FUERZA
+----------------------------------------------------
+    ss -ltnp | grep 3000          ¿hay algo usando el puerto 3000?
+    pkill -f "node server.js"     apaga el servidor del juego
+
+
+6) PRUEBAS (opcional, para desarrollo)
+--------------------------------------
+    npm test                      79 tests automáticos
+    npm run prueba:final          prueba completa con navegadores simulados
+    npm run prueba:rendimiento    mide los cuadros por segundo
+
+
+CONFIGURACIÓN
+-------------
+Todo se cambia en config.json (nombre de la escuela, cantidad de frames,
+jugadores máximos, puerto, segundos por turno, PIN del admin, créditos).
+Después de cambiarlo hay que reiniciar el servidor.
+
+Los puntajes se guardan en data/puntajes.jsonl
